@@ -1,5 +1,18 @@
 import { Injectable } from '@angular/core';
 import { RxState } from '@rx-angular/state';
+import { map, Observable, combineLatest } from 'rxjs';
+
+export interface singleElement {
+  readonly position: number;
+  name: string;
+  weight: number;
+  symbol: string;
+}
+
+export interface ElementState {
+  elements: singleElement[];
+  filter: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +34,7 @@ export class ElementService extends RxState<ElementState> {
         { position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F' },
         { position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne' },
       ],
+      filter: '' 
     });
   }
 
@@ -34,12 +48,19 @@ export class ElementService extends RxState<ElementState> {
       );
     });
   }
-}
-export interface ElementState {
-  elements: Array<{
-    position: number;
-    name: string;
-    weight: number;
-    symbol: string;
-  }>;
+
+  filterElements(filterValue: string): void {
+    this.set({ filter: filterValue });
+  }
+
+  selectFilteredElements(): Observable<singleElement[]> {
+    return combineLatest([this.select('elements'), this.select('filter')]).pipe(
+      map(([elements, filter]) => {
+        const filterValue = filter ? filter.toLowerCase() : '';
+        return elements.filter((element: singleElement) =>
+          element.name.toLowerCase().includes(filterValue) || element.weight.toString().includes(filterValue) || element.symbol.toLowerCase().includes(filterValue)
+        );
+      })
+    );
+  }
 }

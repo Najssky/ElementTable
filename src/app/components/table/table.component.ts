@@ -20,12 +20,11 @@ export class TableComponent implements OnInit {
   elements$: Observable<any>;
 
   constructor(private elementService: ElementService, private dialog: MatDialog) {
-    this.elements$ = this.elementService.elements$;
+    this.elements$ = this.elementService.selectFilteredElements();
   }
 
   ngOnInit(): void {
   }
-
 
   async editElement(position: number): Promise<void> {
     const elementToEdit = await firstValueFrom(
